@@ -1,32 +1,36 @@
-# content-phishing-detection
-=======
-# Content-Based Phishing Detection (HTML-Only)
+# Content-Based Phishing Detection
 
-This repository contains the code, data pipeline, and results for the paper:
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20099937.svg)](https://doi.org/10.5281/zenodo.20099937)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+
+This repository contains the code, dataset pipeline, and full results for the paper:
 
 > **Beyond URL Analysis: Evaluating Content-Based Phishing Detection Using HTML Structural Features**
 > Y. A. Al-Haj, M. M. Al-Falah, N. Mohammed, E. S. Gebel, A. M. H. Obaid
 > *Journal of Artificial Intelligence Topics and Applications (AITA)*, 2026.
 
-The short version: we asked how far you can get classifying phishing pages using only what you can extract from the HTML — no URL strings, no reputation lookups, no network telemetry. The answer turned out to be more interesting than we expected.
+The study evaluates how well phishing webpages can be classified using only features extracted from HTML content, with no URL lexical properties, reputation lookups, or network signals. Seven supervised classifiers are trained on a balanced 40,000-page corpus and analyzed for feature importance, class-specific behavior, and failure modes.
+
+**Archived release:** [10.5281/zenodo.20099937](https://doi.org/10.5281/zenodo.20099937)
 
 ---
 
-## What's in here
+## Repository Contents
 
-A complete, reproducible pipeline that:
+A complete reproducible pipeline that:
 
-1. Pulls phishing URLs from PhishTank and legitimate domains from Tranco
-2. Fetches each page live over HTTP
-3. Extracts 15 features from the raw HTML
+1. Collects phishing URLs from PhishTank and legitimate domains from Tranco
+2. Retrieves each page through live HTTP fetch
+3. Extracts a 15-dimensional feature vector from the HTML source
 4. Trains and evaluates seven classifiers under stratified 5-fold cross-validation
-5. Produces interpretability artifacts (permutation importance, SHAP, ablation, error analysis)
+5. Generates interpretability artifacts: permutation importance, SHAP analysis, ablation study, and qualitative error analysis
 
-Everything lives in a single Jupyter notebook with checkpointing built in, so if your run gets interrupted at hour 14 of 20, it picks up where it left off.
+The collection pipeline includes incremental checkpointing, allowing the run to resume from any interruption without losing progress.
 
 ---
 
-## Quick start
+## Quick Start
 
 ```bash
 git clone https://github.com/MarwanMAlfalah/content-phishing-detection.git
@@ -40,64 +44,65 @@ pip install -r requirements.txt
 jupyter notebook Content_Based_Phishing_Detection_v6_local.ipynb
 ```
 
-Then `Kernel → Restart & Run All`. Go make coffee. The full collection takes 10–25 hours depending on your network.
-
-If you want to skip the data collection and just rerun the analysis on our results, the dataset CSV is in `results/phish_tranco_dataset.csv`. Run cells 15 onward and you'll have everything in about 10 minutes.
+Then select `Kernel → Restart & Run All`. Full collection takes 10–25 hours depending on network conditions. To skip collection and reproduce only the analysis on the published dataset, run cells 15 onward; this completes in approximately 10 minutes.
 
 ---
 
-## A note on PhishTank
+## Data Sources
 
-PhishTank temporarily disabled new account registration during our collection window. The notebook handles this with a fallback chain: it tries PhishTank's auto-download first, then OpenPhish, PhishStats, and URLhaus in order. If you have PhishTank's `online-valid.csv` from a working account, drop it in the project root and the notebook will pick it up automatically — that's the cleanest source.
+The pipeline supports a fallback chain for phishing URL acquisition:
 
-If none of those work for you, you'll get a useful error pointing to the manual download steps.
+1. **PhishTank** (preferred) — community-verified phishing feed. If you have a working account, place `online-valid.csv` in the project root and the notebook will use it automatically.
+2. **OpenPhish** — free community feed
+3. **PhishStats** — phishing URL statistics
+4. **URLhaus** — malicious URL database maintained by abuse.ch
 
----
-
-## What you get
-
-After a complete run, the `results/` folder contains:
-
-| File | Maps to |
-|------|---------|
-| `results_cv_mean_std.csv` | Table 4 — 5-fold CV performance |
-| `aggregated_confusion_metrics.csv` | Table 5 — confusion matrices |
-| `rf_permutation_importance.csv` | Table 6 — feature ranking |
-| `ablation_study.csv` | Table 7 — reduced feature subsets |
-| `figure1_roc_curves.{png,pdf}` | Figure 1 |
-| `figure2_shap_global.{png,pdf}` | Figure 2 |
-| `figure3a_shap_phishing_class.{png,pdf}` | Figure 3a |
-| `figure3b_shap_legitimate_class.{png,pdf}` | Figure 3b |
-| `figure4_shap_dependence_top3.png` | Figure 4 |
-| `figure3_error_profiles.png` | Figure 5 |
-| `all_results.xlsx` | Everything in one Excel workbook |
-| `metadata.json` | Exact package versions, seeds, dataset stats |
-
-You'll also see `_checkpoint.csv` and `errors.csv` during the run. The first is the resume state; the second is a log of fetch failures that's useful when something goes wrong.
+Legitimate domains are sourced from Tranco's research-grade top-domain ranking. The full collection methodology, including timeout values, deduplication strategy, and library versions, is documented in Section III.B of the paper.
 
 ---
 
-## The features
+## Outputs
 
-All 15 features come from parsing the HTML with BeautifulSoup. No URL strings touch the model.
+A complete run populates `results/` with the following:
 
-**Text** (4): `text_len`, `word_count`, `title_len`, `keyword_hits`
-**Structure** (8): `n_scripts`, `n_images`, `n_forms`, `n_inputs`, `n_iframes`, `has_password_field`, `has_submit_field`, `has_email_field`
-**Hyperlinks** (3): `n_links`, `n_external_links`, `external_link_ratio`
-
-External links are detected by comparing registered domains via `tldextract`, not the raw netloc. The keyword list is `verify`, `login`, `password`, `update`, `bank`, `account`, `confirm`, `secure` — counted as distinct presence, not occurrence frequency.
-
-Full definitions are in Table 3 of the paper.
+| File | Paper Reference |
+|------|-----------------|
+| `results_cv_mean_std.csv` | Table 4 — Cross-validation performance |
+| `aggregated_confusion_metrics.csv` | Table 5 — Aggregated confusion matrices |
+| `rf_permutation_importance.csv` | Table 6 — Feature importance ranking |
+| `ablation_study.csv` | Table 7 — Ablation results |
+| `figure1_roc_curves.{png,pdf}` | Figure 1 — ROC curves |
+| `figure2_shap_global.{png,pdf}` | Figure 2 — Global SHAP summary |
+| `figure3a_shap_phishing_class.{png,pdf}` | Figure 3a — SHAP for phishing class |
+| `figure3b_shap_legitimate_class.{png,pdf}` | Figure 3b — SHAP for legitimate class |
+| `figure4_shap_dependence_top3.png` | Figure 4 — Dependence plots |
+| `figure3_error_profiles.png` | Figure 5 — Error feature profiles |
+| `all_results.xlsx` | Combined Excel workbook |
+| `metadata.json` | Run configuration and package versions |
 
 ---
 
-## Headline numbers
+## Feature Set
 
-From the latest run on a balanced 40,000-page corpus:
+All 15 features are derived from parsed HTML using BeautifulSoup. URL strings are not used at any stage of feature extraction or model training.
+
+**Textual** (4): `text_len`, `word_count`, `title_len`, `keyword_hits`
+**Structural** (8): `n_scripts`, `n_images`, `n_forms`, `n_inputs`, `n_iframes`, `has_password_field`, `has_submit_field`, `has_email_field`
+**Hyperlink** (3): `n_links`, `n_external_links`, `external_link_ratio`
+
+External links are identified by comparing registered domains using `tldextract` rather than raw netloc strings. The phishing keyword list (`verify`, `login`, `password`, `update`, `bank`, `account`, `confirm`, `secure`) is counted as distinct presence per page, not occurrence frequency.
+
+Complete feature definitions are provided in Table 3 of the paper.
+
+---
+
+## Headline Results
+
+Performance on the balanced 40,000-page corpus (20,000 phishing + 20,000 legitimate), stratified 5-fold cross-validation:
 
 | Model | F1 | AUC | FNR | FPR |
 |-------|-----|------|------|------|
-| **Random Forest** | **0.940** ± 0.002 | **0.983** ± 0.001 | 0.065 | 0.053 |
+| **Random Forest** | **0.940 ± 0.002** | **0.983 ± 0.001** | 0.065 | 0.053 |
 | Decision Tree | 0.921 ± 0.002 | 0.929 ± 0.002 | 0.070 | 0.089 |
 | KNN | 0.913 ± 0.004 | 0.956 ± 0.002 | 0.101 | 0.071 |
 | MLP | 0.908 ± 0.002 | 0.970 ± 0.001 | 0.057 | 0.135 |
@@ -105,15 +110,13 @@ From the latest run on a balanced 40,000-page corpus:
 | AdaBoost | 0.892 ± 0.004 | 0.957 ± 0.003 | 0.051 | 0.179 |
 | Gaussian NB | 0.838 ± 0.003 | 0.885 ± 0.004 | 0.027 | 0.349 |
 
-The interesting bit isn't that Random Forest wins — that's expected on tabular data this size. The interesting bit is that four features (`n_links`, `n_scripts`, `n_images`, `title_len`) carry most of the signal, while three intuitively-promising binary features (`has_password_field`, `has_submit_field`, `has_email_field`) contribute almost nothing. A 5-feature subset reaches F1 = 0.926, only 1.4 points below the full model.
-
-The paper digs into why.
+Beyond the headline numbers, the paper's central finding is that predictive signal concentrates in four features (`n_links`, `n_scripts`, `n_images`, `title_len`), with three intuitively-relevant binary features (`has_password_field`, `has_submit_field`, `has_email_field`) contributing marginally. A 5-feature subset retains F1 = 0.926, only 1.4 points below the full model. The paper analyzes why.
 
 ---
 
 ## Reproducibility
 
-Random seed is fixed at `42` throughout. All standardization happens inside the cross-validation loop (training fold only) using `ColumnTransformer` — no leakage. Versions used:
+The random seed is fixed at `42` throughout. Standardization is performed inside the cross-validation loop using `ColumnTransformer` with parameters estimated from the training fold only, preventing information leakage. The library versions used in the published results:
 
 ```
 Python 3.11
@@ -126,40 +129,40 @@ tldextract 5.1
 shap 0.51
 ```
 
-These are pinned in `requirements.txt` with minimum versions. The exact versions used at runtime are recorded in `results/metadata.json` after each run.
+These are pinned with minimum version constraints in `requirements.txt`. Exact versions for any given run are recorded in `results/metadata.json`.
+
+The frozen v1.0.0 release archived on Zenodo ([10.5281/zenodo.20099937](https://doi.org/10.5281/zenodo.20099937)) corresponds to the exact code state used to produce the results reported in the paper.
 
 ---
 
-## Tips from running this in practice
+## Practical Notes
 
-A few things we learned the hard way:
+A few operational details worth highlighting:
 
-- **On macOS, run `caffeinate -dims &` in another terminal before starting collection.** Otherwise your laptop will sleep around hour 4 and you'll be sad.
-- **Tranco caches its list locally** under `.tranco_cache/`. The first call fetches; subsequent calls are instant. Don't delete this folder unless you want to re-download.
-- **PhishTank URLs expire fast.** Expect 30–70% fetch success depending on how recent the feed is. The pipeline accounts for this with a 5x oversampling ratio.
-- **Checkpoints save every 50 successful pages.** If the kernel dies, just re-run cells 11–13 and it'll pick up.
-- **The paper's results were generated on a MacBook Air M4** (Apple Silicon). Everything works on Intel and Linux too, no Apple-specific code.
+- **macOS sleep prevention.** For long collection runs, execute `caffeinate -dims &` in a separate terminal before starting the notebook to prevent the system from sleeping mid-collection.
+- **Tranco caching.** The Tranco library caches domain lists in `.tranco_cache/`. Initial fetches require network access; subsequent calls are served from cache.
+- **Phishing URL volatility.** PhishTank URLs are short-lived; expect 30–70% fetch success rates depending on feed recency. The pipeline applies 5x oversampling to compensate.
+- **Checkpointing.** The pipeline saves progress every 50 successful pages. If the kernel terminates unexpectedly, re-running cells 11–13 resumes from the last checkpoint.
+- **Hardware.** Results in the paper were generated on a MacBook Air M4 (Apple Silicon). The pipeline is portable across Intel and Linux platforms with no architecture-specific code.
 
 ---
 
-## Limitations (honest version)
+## Scope and Limitations
 
-This isn't a deployment-ready phishing detector. A few things to keep in mind:
+This study evaluates content-based phishing detection within a controlled experimental setting. The following design choices and constraints are explicitly noted:
 
-- The 50:50 class balance is an artifact of the experimental design, not the wild distribution
-- We didn't tune hyperparameters — defaults only, by choice
-- No temporal split: train and test pages were collected in the same window
-- No cross-dataset evaluation
-- No adversarial robustness testing
-- No JavaScript rendering — we parse static HTML only
+- The dataset is balanced 50:50 by design to isolate feature-level analysis from class-imbalance effects. This does not reflect the natural class distribution observed in production environments.
+- Hyperparameters are set to scikit-learn defaults to establish a baseline that isolates the contribution of the feature representation. Tuning is identified as future work in Section VI of the paper.
+- Training and test data are drawn from the same collection window. Temporal validation, cross-dataset transfer, and adversarial robustness evaluation are not within the scope of this study.
+- Feature extraction operates on static HTML. Pages whose primary content is rendered through JavaScript after page load are not fully characterized.
 
-The paper has a full Limitations section that goes into this in more detail. If you're using this code as a starting point for production work, please read Section VI before drawing conclusions.
+The paper's Section VI provides a complete discussion of limitations and outlines specific directions for follow-up work.
 
 ---
 
 ## Citation
 
-If you use this code, please cite the paper:
+If this code or dataset contributes to your research, please cite both the paper and the archived software release:
 
 ```bibtex
 @article{alhaj2026beyond,
@@ -170,12 +173,27 @@ If you use this code, please cite the paper:
   journal = {Journal of Artificial Intelligence Topics and Applications (AITA)},
   year    = {2026}
 }
+
+@software{alfalah2026phishing_software,
+  author       = {Al-Falah, Marwan M.},
+  title        = {{MarwanMAlfalah/content-phishing-detection: Initial release}},
+  month        = may,
+  year         = 2026,
+  publisher    = {Zenodo},
+  version      = {v1.0.0},
+  doi          = {10.5281/zenodo.20099937},
+  url          = {https://doi.org/10.5281/zenodo.20099937}
+}
 ```
 
 ---
 
 ## License
 
-MIT — see [LICENSE](LICENSE). Use it, fork it, build on it. A citation if you publish based on it would be appreciated.
+Released under the MIT License. See [LICENSE](LICENSE) for full terms.
 
 ---
+
+## Contact
+
+For questions related to the methodology or experimental design, contact the corresponding author Al-Falah, Marwan M. at `alfalah.m@edu.spbstu.ru`. For implementation issues, please open a GitHub issue so that responses are visible to all users.
