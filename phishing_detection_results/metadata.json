@@ -1,0 +1,46 @@
+{
+  "paper": "Beyond URL Analysis -- Al-Haj et al. AITA Journal",
+  "collection_date": "2026-04-12 21:48 UTC",
+  "target_per_class": 20000,
+  "n_phishing": 446,
+  "n_legitimate": 20000,
+  "n_total": 20446,
+  "class_ratio": "97.8% legit / 2.2% phish",
+  "feature_dim": 15,
+  "features": [
+    "text_len",
+    "word_count",
+    "title_len",
+    "keyword_hits",
+    "n_scripts",
+    "n_images",
+    "n_forms",
+    "n_inputs",
+    "n_iframes",
+    "has_password_field",
+    "has_submit_field",
+    "has_email_field",
+    "n_links",
+    "n_external_links",
+    "external_link_ratio"
+  ],
+  "n_folds": 5,
+  "random_state": 42,
+  "packages": {
+    "python": "3.11.0",
+    "scikit-learn": "1.8.0",
+    "numpy": "2.4.4",
+    "pandas": "3.0.2",
+    "beautifulsoup4": "4.14.3",
+    "requests": "2.33.1",
+    "shap": "0.51.0",
+    "scipy": "1.17.1",
+    "tldextract": "5.3.1"
+  },
+  "collection_stats": {
+    "phish_ok": 446,
+    "phish_fail": 11931,
+    "legit_ok": 20000,
+    "legit_fail": 56383
+  }
+}

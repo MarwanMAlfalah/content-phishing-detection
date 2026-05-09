@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Cache
+.tranco_cache/
+.cache/
+
+# Large data files (keep CSVs in results/)
+*.zip
+phishtank_online_valid.csv
+online-valid.csv
+
+# Temporary
+*.tmp
+*.bak

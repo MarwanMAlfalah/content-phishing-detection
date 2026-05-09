@@ -1,0 +1,8 @@
+,Gaussian NB,SVM-RBF,KNN,Decision Tree,Random Forest,AdaBoost,MLP
+Gaussian NB,0,0,0,0,0,3,0
+SVM-RBF,5,0,0,0,0,5,0
+KNN,5,5,0,0,0,5,1
+Decision Tree,5,5,5,0,0,5,4
+Random Forest,5,5,5,5,0,5,5
+AdaBoost,2,0,0,0,0,0,0
+MLP,5,5,4,1,0,5,0
