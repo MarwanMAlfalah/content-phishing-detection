@@ -1,3 +1,6 @@
+<<<<<<< HEAD
+# content-phishing-detection
+=======
 # Content-Based Phishing Detection (HTML-Only)
 
 This repository contains the code, data pipeline, and results for the paper:
@@ -183,3 +186,4 @@ MIT — see [LICENSE](LICENSE). Use it, fork it, build on it. A citation if you 
 For questions about the paper or methodology, contact Yousif A. Al-Haj at `yalhaj@gmail.com`.
 
 For issues with the code itself, please open a GitHub issue rather than emailing — that way the answer helps everyone.
+>>>>>>> 09bf642 (Initial release: complete reproducible pipeline for AITA paper)
